@@ -12,7 +12,7 @@ function ImageConverter() {
   const from = format ? format.split('-to-')[0].toLowerCase() : '';
   const to = format ? format.split('-to-')[1].toLowerCase() : '';
 
-  const goToRoute = (obj) => {
+  const goToRoute = (obj:any) => {
     const [beforeTo, afterTo] = format.split('-to-');
     if (obj.from !== null) {
       console.log("from", obj.from);
@@ -32,7 +32,7 @@ function ImageConverter() {
     setSelectedTo(to);
   }, [from, to])
 
-  const isValidFormat = (inputFormat) => {
+  const isValidFormat = (inputFormat:any) => {
     if (!inputFormat) return false;
 
     const [from, to] = inputFormat.split('-to-');
@@ -43,15 +43,15 @@ function ImageConverter() {
       from.toLowerCase() !== to.toLowerCase();
   };
 
-  const [file, setFile] = useState(null);
+  const [file, setFile]:any = useState(null);
   const [selectedFrom, setSelectedFrom] = useState(from);
   const [selectedTo, setSelectedTo] = useState(to);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e:any) => {
     setFile(e.target.files[0]);
   };
 
-  const handleFromChange = (e) => {
+  const handleFromChange = (e:any) => {
     const [beforeTo, afterTo] = format.split('-to-');
 
 
@@ -62,7 +62,7 @@ function ImageConverter() {
 
   }
 
-  const handleToChange = (e) => {
+  const handleToChange = (e:any) => {
     const [beforeTo, afterTo] = format.split('-to-');
 
     if (e.target.value !== beforeTo) {
@@ -113,13 +113,13 @@ function ImageConverter() {
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e:any) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
     setFile(droppedFile);
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e:any) => {
     e.preventDefault();
   };
   console.log(selectedTo);

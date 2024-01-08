@@ -5,14 +5,14 @@ import Ad from './components/ad';
 
 const Home = () => {
   
-  const [file, setFile] = useState(null);
+  const [file, setFile]:any = useState(null);
   const [format, setFormat] = useState('jpg');
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e:any) => {
     setFile(e.target.files[0]);
   };
 
-  const handleFormatChange = (e) => {
+  const handleFormatChange = (e:any) => {
     setFormat(e.target.value);
   };
 
@@ -58,13 +58,13 @@ const Home = () => {
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e:any) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
     setFile(droppedFile);
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e:any) => {
     e.preventDefault();
   };
 
