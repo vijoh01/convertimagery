@@ -1,0 +1,37 @@
+{
+  "name": "convertimagery",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@img/sharp-linux-x64": "^0.33.1",
+    "@types/multer": "^1.4.11",
+    "cloudinary": "^1.41.2",
+    "express": "^4.18.2",
+    "formidable": "^3.5.1",
+    "fs-extra": "^11.2.0",
+    "multer": "^1.4.5-lts.1",
+    "multiparty": "^4.2.3",
+    "next": "14.0.4",
+    "next-connect": "^1.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "sharp": "^0.33.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  }
+}
