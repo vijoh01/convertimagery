@@ -1,5 +1,5 @@
 import multiparty from 'multiparty';
-import sharp from '@img/sharp-linux-x64';
+import sharp from 'sharp';
 import fs from 'fs/promises';
 
 export const config = {
