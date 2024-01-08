@@ -2,7 +2,6 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import '../app/globals.css'
-import { convertImage } from '@/data-access';
 
 const types = ['jpg', 'jpeg', 'png', 'webp', 'tiff', 'gif', 'heic', 'heif', 'avif']
 
@@ -80,14 +79,17 @@ function ImageConverter() {
     formData.append('format', selectedTo);
 
     try {
-      const response = await convertImage(formData);
-      console.log(response);
-      
-     
+      const response = await fetch('/api/convert', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        // Convert response to blob
+        const blob = await response.blob();
+
         // Create a download link
-        const url = window.URL.createObjectURL(response);
-        console.log(url);
-        
+        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `converted.${selectedTo}`;
@@ -103,7 +105,9 @@ function ImageConverter() {
         window.URL.revokeObjectURL(url);
 
         console.log('Conversion successful!');
-    
+      } else {
+        console.error('Conversion failed!');
+      }
     } catch (error) {
       console.error('Error during conversion:', error);
     }

@@ -9,63 +9,67 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  console.log('API route hit');
-  
-  const form = new multiparty.Form();
+  if (req.method === 'POST') {
+    console.log('API route hit');
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error('Error parsing form:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const form = new multiparty.Form();
 
-    const file = files.file ? files.file[0] : null;
-    const format = Array.isArray(fields.format) ? fields.format[0] : fields.format;
-
-    console.log('Received file:', file);
-    console.log('Received format:', format);
-
-    if (!file || !isValidFormat(format) || !isValidImageFormat(file)) {
-      console.error('Invalid file or image format');
-      return res.status(400).json({ error: 'Invalid file or image format' });
-    }
-
-    const inputFile = file.path;
-    const outputFileName = `converted.${format}`;
-    const outputFile = `./${outputFileName}`; // Adjust the path as needed
-
-    try {
-      console.log('Converting image...');
-
-      // Use toBuffer to get the image buffer
-      const imageBuffer = await sharp(inputFile).toBuffer();
-
-      // Save the buffer to the GIF file
-      await fs.writeFile(outputFile, imageBuffer);
-
-      console.log('Conversion successful');
-
-      // Set response headers for download
-      res.setHeader('Content-Disposition', `attachment; filename=${outputFileName}`);
-      res.setHeader('Content-Type', 'image/' + format);
-
-      // Send the file as response
-      res.send(imageBuffer);
-
-      // No need to delete the output file for GIF
-    } catch (error) {
-      console.error('Error during conversion');
-      res.status(500).json({ error: 'Conversion failed' });
-    } finally {
-      try {
-        await fs.access(outputFile);
-        await fs.unlink(outputFile);
-        console.log('Deleted output file:', outputFile);
-      } catch (deleteError) {
-        console.error('Error deleting output file');
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error('Error parsing form:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
       }
-    }
-  });
+
+      const file = files.file ? files.file[0] : null;
+      const format = Array.isArray(fields.format) ? fields.format[0] : fields.format;
+
+      console.log('Received file:', file);
+      console.log('Received format:', format);
+
+      if (!file || !isValidFormat(format) || !isValidImageFormat(file)) {
+        console.error('Invalid file or image format');
+        return res.status(400).json({ error: 'Invalid file or image format' });
+      }
+
+      const inputFile = file.path;
+      const outputFileName = `converted.${format}`;
+      const outputDirectory = './converted'; // Adjust the directory as needed
+      const outputFile = `${outputDirectory}/${outputFileName}`;
+
+      try {
+        console.log('Converting image...');
+
+        // Use toBuffer to get the image buffer
+        const imageBuffer = await sharp(inputFile).toBuffer();
+
+        // Save the buffer to the output file
+        await fs.mkdir(outputDirectory, { recursive: true }); // Create the directory if it doesn't exist
+        await fs.writeFile(outputFile, imageBuffer);
+
+        console.log('Conversion successful');
+
+        // Set response headers for download
+        res.setHeader('Content-Disposition', `attachment; filename=${outputFileName}`);
+        res.setHeader('Content-Type', 'image/' + format);
+        res.setHeader('Cache-Control', 'public, max-age=31536000'); // Set appropriate cache control
+        res.setHeader('Content-Length', imageBuffer.length);
+
+        // Send the file as response
+        res.send(imageBuffer);
+      } catch (error) {
+        console.error('Error during conversion:', error);
+        res.status(500).json({ error: 'Conversion failed' });
+      } finally {
+        try {
+          await fs.access(outputFile);
+          await fs.unlink(outputFile);
+          console.log('Deleted output file:', outputFile);
+        } catch (deleteError) {
+          console.error('Error deleting output file:', deleteError);
+        }
+      }
+    });
+  }
 }
 
 function isValidFormat(format) {
