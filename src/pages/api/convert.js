@@ -1,5 +1,5 @@
 import multiparty from 'multiparty';
-import sharp from 'sharp';
+import Jimp from 'jimp';
 import fs from 'fs/promises';
 
 export const config = {
@@ -39,12 +39,11 @@ export default async function handler(req, res) {
       try {
         console.log('Converting image...');
 
-        // Use toBuffer to get the image buffer
-        const imageBuffer = await sharp(inputFile).toBuffer();
+        // Use Jimp to read the input image
+        const image = await Jimp.read(inputFile);
 
-        // Save the buffer to the output file
-        await fs.mkdir(outputDirectory, { recursive: true }); // Create the directory if it doesn't exist
-        await fs.writeFile(outputFile, imageBuffer);
+        // Convert the image to the desired format
+        await image.writeAsync(outputFile);
 
         console.log('Conversion successful');
 
@@ -52,9 +51,10 @@ export default async function handler(req, res) {
         res.setHeader('Content-Disposition', `attachment; filename=${outputFileName}`);
         res.setHeader('Content-Type', 'image/' + format);
         res.setHeader('Cache-Control', 'public, max-age=31536000'); // Set appropriate cache control
-        res.setHeader('Content-Length', imageBuffer.length);
+        res.setHeader('Content-Length', (await fs.stat(outputFile)).size);
 
         // Send the file as response
+        const imageBuffer = await fs.readFile(outputFile);
         res.send(imageBuffer);
       } catch (error) {
         console.error('Error during conversion:', error);
@@ -85,15 +85,10 @@ function isValidFormat(format) {
 async function isValidImageFormat(file) {
   // Check if the file format is one of the valid image formats
   try {
-    const imageInfo = await sharp(file.path).metadata();
-    return imageInfo.format !== undefined && isValidFormat(imageInfo.format.toLowerCase());
+    const image = await Jimp.read(file.path);
+    return isValidFormat(image.getExtension().toLowerCase());
   } catch (error) {
-    if (error.message.includes('unsupported image format')) {
-      console.error('Unsupported image format');
-      return false;
-    } else {
-      console.error('Error checking image format:', error);
-      return false;
-    }
+    console.error('Error checking image format:', error);
+    return false;
   }
 }
