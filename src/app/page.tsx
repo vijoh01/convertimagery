@@ -29,7 +29,7 @@ const Home = () => {
         body: formData,
       });
 
-      if (response.ok) {
+ 
         // Convert response to blob
         const blob = await response.blob();
 
@@ -50,9 +50,7 @@ const Home = () => {
         window.URL.revokeObjectURL(url);
 
         console.log('Conversion successful!');
-      } else {
-        console.error('Conversion failed!');
-      }
+    
     } catch (error) {
       console.error('Error during conversion:', error);
     }
