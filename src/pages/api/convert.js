@@ -36,25 +36,22 @@ export default async function handler(req, res) {
 
     try {
       console.log('Converting image...');
-
-      // Use sharp for image processing
+  
+      // Use local sharp binary for image processing
       await sharp(inputFile)
         .toFormat(format)
         .toFile(outputFile);
-
+  
       console.log('Conversion successful');
-
-      // Read the file contents
-      const fileContents = await fs.readFile(outputFile);
-
+  
       // Set response headers for download
       res.setHeader('Content-Disposition', `attachment; filename=${outputFileName}`);
       res.setHeader('Content-Type', `image/${format}`);
-
-      // Send the file contents as the response
-      res.end(fileContents);
+  
+      // Send the file as response
+      res.sendFile(outputFile);
     } catch (error) {
-      console.error('Error during conversion:', error);
+      console.error('Error during conversion');
       res.status(500).json({ error: 'Conversion failed' });
     } finally {
       try {
