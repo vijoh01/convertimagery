@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import multiparty from 'multiparty';
+import fs from 'fs/promises';
 
 export const config = {
   api: {
@@ -43,23 +44,25 @@ export default async function handler(req, res) {
 
       console.log('Conversion successful');
 
+      // Read the file contents
+      const fileContents = await fs.readFile(outputFile);
+
       // Set response headers for download
       res.setHeader('Content-Disposition', `attachment; filename=${outputFileName}`);
       res.setHeader('Content-Type', `image/${format}`);
 
-      // Send the file as response
-      res.sendFile(outputFile);
+      // Send the file contents as the response
+      res.end(fileContents);
     } catch (error) {
-      console.error('Error during conversion');
+      console.error('Error during conversion:', error);
       res.status(500).json({ error: 'Conversion failed' });
     } finally {
       try {
-        // Delete the output file
-        await fs.access(outputFile);
+        // Delete the output file using fs.unlink
         await fs.unlink(outputFile);
         console.log('Deleted output file:', outputFile);
       } catch (deleteError) {
-        console.error('Error deleting output file');
+        console.error('Error deleting output file:', deleteError);
       }
     }
   });
