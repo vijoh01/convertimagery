@@ -1,7 +1,6 @@
-import { createCanvas, loadImage } from 'canvas';
-import { writeFileSync } from 'fs';
+import sharp from 'sharp';
 import multiparty from 'multiparty';
-import imageSize from 'image-size';
+
 export const config = {
   api: {
     bodyParser: false,
@@ -37,22 +36,19 @@ export default async function handler(req, res) {
     try {
       console.log('Converting image...');
 
-      const image = await loadImage(inputFile);
-      const canvas = createCanvas(image.width, image.height);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(image, 0, 0, image.width, image.height);
-
-      // Save the buffer to the output file
-      writeFileSync(outputFile, canvas.toBuffer());
+      // Use sharp for image processing
+      await sharp(inputFile)
+        .toFormat(format)
+        .toFile(outputFile);
 
       console.log('Conversion successful');
 
       // Set response headers for download
       res.setHeader('Content-Disposition', `attachment; filename=${outputFileName}`);
-      res.setHeader('Content-Type', 'image/' + format);
+      res.setHeader('Content-Type', `image/${format}`);
 
       // Send the file as response
-      res.send(canvas.toBuffer());
+      res.sendFile(outputFile);
     } catch (error) {
       console.error('Error during conversion');
       res.status(500).json({ error: 'Conversion failed' });
@@ -82,8 +78,8 @@ function isValidFormat(format) {
 async function isValidImageFormat(file) {
   // Check if the file format is one of the valid image formats
   try {
-    const dimensions = imageSize(file.path);
-    return isValidFormat(dimensions.type);
+    await sharp(file.path).metadata();
+    return true;
   } catch (error) {
     console.error('Error checking image format:', error);
     return false;
